@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { observer } from 'mobx-react-lite';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -10,22 +11,12 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { GraphNode, GraphEdge } from '../types/graph.types';
+import { useGraphStore } from '../stores/StoreContext';
 
-const initialNodes: GraphNode[] = [
-  {
-    id: '1',
-    type: 'default',
-    position: { x: 250, y: 150 },
-    data: { label: 'Node 1' },
-  },
-];
-
-const initialEdges: GraphEdge[] = [];
-
-function GraphCanvas() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+const GraphCanvas = observer(() => {
+  const graphStore = useGraphStore();
+  const [nodes, setNodes, onNodesChange] = useNodesState(graphStore.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(graphStore.edges);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -48,6 +39,6 @@ function GraphCanvas() {
       </ReactFlow>
     </div>
   );
-}
+});
 
 export default GraphCanvas;
