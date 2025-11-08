@@ -4,7 +4,7 @@ import './NodeCreationModal.css';
 interface NodeCreationModalProps {
   isOpen: boolean;
   position: { x: number; y: number };
-  onSubmit: (label: string) => void;
+  onSubmit: (label: string, setError: (error: string) => void) => void;
   onCancel: () => void;
 }
 
@@ -27,7 +27,7 @@ const NodeCreationModal = ({ isOpen, position, onSubmit, onCancel }: NodeCreatio
       setError('Please enter a node label');
       return;
     }
-    onSubmit(label.trim());
+    onSubmit(label.trim(), setError);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

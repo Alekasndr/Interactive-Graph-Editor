@@ -112,10 +112,12 @@ const GraphCanvas = observer(() => {
   );
 
   const handleModalSubmit = useCallback(
-    (label: string) => {
+    (label: string, setError: (error: string) => void) => {
       const result = graphStore.addNode(label, modalState.flowPosition);
       if (result.success) {
         setModalState({ ...modalState, isOpen: false });
+      } else if (result.error) {
+        setError(result.error);
       }
     },
     [graphStore, modalState]
