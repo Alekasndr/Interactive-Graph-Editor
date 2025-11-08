@@ -22,6 +22,39 @@ class GraphStore {
   constructor() {
     makeAutoObservable(this);
   }
+
+  private generateNodeId(): string {
+    const maxId = this.nodes.reduce((max, node) => {
+      const numId = parseInt(node.id);
+      return numId > max ? numId : max;
+    }, 0);
+    return String(maxId + 1);
+  }
+
+  private isLabelUnique(label: string): boolean {
+    return !this.nodes.some(node => node.data.label === label);
+  }
+
+  addNode(label: string, position: { x: number; y: number }): { success: boolean; error?: string } {
+    if (!label.trim()) {
+      return { success: false, error: 'Label cannot be empty' };
+    }
+
+    if (!this.isLabelUnique(label)) {
+      return { success: false, error: `Label "${label}" already exists` };
+    }
+
+    const newNode: GraphNode = {
+      id: this.generateNodeId(),
+      type: 'default',
+      position,
+      data: { label },
+    };
+
+    this.nodes.push(newNode);
+    this.nodes = [...this.nodes];
+    return { success: true };
+  }
 }
 
 export default GraphStore;
