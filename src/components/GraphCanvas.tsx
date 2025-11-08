@@ -29,6 +29,7 @@ const GraphCanvas = observer(() => {
     screenPosition: { x: 0, y: 0 },
     flowPosition: { x: 0, y: 0 },
   });
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -50,6 +51,15 @@ const GraphCanvas = observer(() => {
     },
     [graphStore]
   );
+
+  const onConnectStart = useCallback(() => {
+    setIsConnecting(true);
+  }, []);
+
+  const onConnectEnd = useCallback(() => {
+    // Reset with delay to prevent modal opening after connection
+    setTimeout(() => setIsConnecting(false), 300);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -79,6 +89,10 @@ const GraphCanvas = observer(() => {
 
   const onPaneClick = useCallback(
     (event: React.MouseEvent) => {
+      if (isConnecting) {
+        return;
+      }
+
       const screenPosition = {
         x: event.clientX,
         y: event.clientY,
@@ -94,7 +108,7 @@ const GraphCanvas = observer(() => {
         flowPosition,
       });
     },
-    [screenToFlowPosition]
+    [screenToFlowPosition, isConnecting]
   );
 
   const handleModalSubmit = useCallback(
@@ -119,6 +133,8 @@ const GraphCanvas = observer(() => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onConnectStart={onConnectStart}
+        onConnectEnd={onConnectEnd}
         onPaneClick={onPaneClick}
         fitView
       >
