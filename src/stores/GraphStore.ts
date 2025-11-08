@@ -39,6 +39,20 @@ class GraphStore {
     this.nodes = newNodes;
   }
 
+  updateEdges(newEdges: GraphEdge[]) {
+    this.edges = newEdges;
+  }
+
+  deleteNodes(nodeIds: string[]) {
+    this.nodes = this.nodes.filter(node => !nodeIds.includes(node.id));
+    this.nodes = [...this.nodes];
+  }
+
+  deleteEdges(edgeIds: string[]) {
+    this.edges = this.edges.filter(edge => !edgeIds.includes(edge.id));
+    this.edges = [...this.edges];
+  }
+
   addNode(label: string, position: { x: number; y: number }): { success: boolean; error?: string } {
     if (!label.trim()) {
       return { success: false, error: 'Label cannot be empty' };

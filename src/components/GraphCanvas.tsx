@@ -4,12 +4,14 @@ import ReactFlow, {
   MiniMap,
   Controls,
   Background,
-  useNodesState,
-  useEdgesState,
   addEdge,
   Connection,
   BackgroundVariant,
   useReactFlow,
+  NodeChange,
+  EdgeChange,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useGraphStore } from '../stores/StoreContext';
@@ -18,8 +20,6 @@ import NodeCreationModal from './NodeCreationModal';
 const GraphCanvas = observer(() => {
   const graphStore = useGraphStore();
   const { screenToFlowPosition } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState(graphStore.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(graphStore.edges);
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     screenPosition: { x: number; y: number };
@@ -30,20 +30,52 @@ const GraphCanvas = observer(() => {
     flowPosition: { x: 0, y: 0 },
   });
 
-  useEffect(() => {
-    graphStore.updateNodes(nodes);
-  }, [nodes, graphStore]);
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      graphStore.updateNodes(applyNodeChanges(changes, graphStore.nodes));
+    },
+    [graphStore]
+  );
 
-  useEffect(() => {
-    if (nodes.length !== graphStore.nodes.length) {
-      setNodes(graphStore.nodes);
-    }
-  }, [graphStore.nodes.length, graphStore.nodes, setNodes, nodes.length]);
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      graphStore.updateEdges(applyEdgeChanges(changes, graphStore.edges));
+    },
+    [graphStore]
+  );
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    (params: Connection) => {
+      graphStore.updateEdges(addEdge(params, graphStore.edges));
+    },
+    [graphStore]
   );
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'd' || event.key === 'D') {
+        const selectedNodes = graphStore.nodes.filter(node => node.selected);
+        const selectedEdges = graphStore.edges.filter(edge => edge.selected);
+
+        if (selectedNodes.length > 0 || selectedEdges.length > 0) {
+          event.preventDefault();
+
+          if (selectedNodes.length > 0) {
+            const nodeIds = selectedNodes.map(node => node.id);
+            graphStore.deleteNodes(nodeIds);
+          }
+
+          if (selectedEdges.length > 0) {
+            const edgeIds = selectedEdges.map(edge => edge.id);
+            graphStore.deleteEdges(edgeIds);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [graphStore]);
 
   const onPaneClick = useCallback(
     (event: React.MouseEvent) => {
@@ -82,8 +114,8 @@ const GraphCanvas = observer(() => {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={graphStore.nodes}
+        edges={graphStore.edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
