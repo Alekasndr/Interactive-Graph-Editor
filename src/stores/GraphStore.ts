@@ -46,6 +46,11 @@ class GraphStore {
   deleteNodes(nodeIds: string[]) {
     this.nodes = this.nodes.filter(node => !nodeIds.includes(node.id));
     this.nodes = [...this.nodes];
+
+    this.edges = this.edges.filter(edge =>
+      !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target)
+    );
+    this.edges = [...this.edges];
   }
 
   deleteEdges(edgeIds: string[]) {
