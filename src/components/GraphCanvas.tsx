@@ -31,8 +31,14 @@ const GraphCanvas = observer(() => {
   });
 
   useEffect(() => {
-    setNodes(graphStore.nodes);
-  }, [graphStore.nodes, setNodes]);
+    graphStore.updateNodes(nodes);
+  }, [nodes, graphStore]);
+
+  useEffect(() => {
+    if (nodes.length !== graphStore.nodes.length) {
+      setNodes(graphStore.nodes);
+    }
+  }, [graphStore.nodes.length, graphStore.nodes, setNodes, nodes.length]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),

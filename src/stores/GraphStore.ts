@@ -35,6 +35,10 @@ class GraphStore {
     return !this.nodes.some(node => node.data.label === label);
   }
 
+  updateNodes(newNodes: GraphNode[]) {
+    this.nodes = newNodes;
+  }
+
   addNode(label: string, position: { x: number; y: number }): { success: boolean; error?: string } {
     if (!label.trim()) {
       return { success: false, error: 'Label cannot be empty' };
