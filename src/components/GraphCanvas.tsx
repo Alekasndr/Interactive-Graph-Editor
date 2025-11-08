@@ -16,6 +16,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { useGraphStore } from '../stores/StoreContext';
 import NodeCreationModal from './NodeCreationModal';
+import SearchBar from './SearchBar';
 
 const GraphCanvas = observer(() => {
   const graphStore = useGraphStore();
@@ -83,8 +84,20 @@ const GraphCanvas = observer(() => {
       }
     };
 
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest('.search-bar-container')) {
+        return;
+      }
+      graphStore.setSearchQuery('');
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('click', handleClick);
+    };
   }, [graphStore]);
 
   const onPaneClick = useCallback(
@@ -127,10 +140,16 @@ const GraphCanvas = observer(() => {
     setModalState({ ...modalState, isOpen: false });
   }, [modalState]);
 
+  const nodesWithHighlight = graphStore.nodes.map(node => ({
+    ...node,
+    className: node.id === graphStore.highlightedNodeId ? 'highlighted-node' : '',
+  }));
+
   return (
     <div style={{ width: '100%', height: '100%' }}>
+      <SearchBar />
       <ReactFlow
-        nodes={graphStore.nodes}
+        nodes={nodesWithHighlight}
         edges={graphStore.edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}

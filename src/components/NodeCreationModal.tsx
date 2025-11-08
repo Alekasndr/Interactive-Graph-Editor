@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import './NodeCreationModal.css';
+import '../styles/NodeCreationModal.css';
 
 interface NodeCreationModalProps {
   isOpen: boolean;

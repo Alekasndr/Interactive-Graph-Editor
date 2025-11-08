@@ -18,9 +18,25 @@ class GraphStore {
   ];
 
   edges: GraphEdge[] = [];
+  searchQuery: string = '';
+  highlightedNodeId: string | null = null;
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  setSearchQuery(query: string) {
+    this.searchQuery = query;
+    if (query.trim() === '') {
+      this.highlightedNodeId = null;
+      return;
+    }
+
+    const foundNode = this.nodes.find(node =>
+      node.data.label.toLowerCase() === query.toLowerCase()
+    );
+
+    this.highlightedNodeId = foundNode ? foundNode.id : null;
   }
 
   private generateNodeId(): string {
