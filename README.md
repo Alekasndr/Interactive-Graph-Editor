@@ -6,6 +6,7 @@ An interactive graph editor built with React 19, TypeScript, and React Flow that
 
 - **Node Management**: Create nodes by clicking on the canvas background
 - **Edge Creation**: Connect nodes by dragging between node handles
+- **Edge Weights**: All edges have weights (default = 1), editable by double-clicking the edge
 - **Delete Operations**: Select nodes/edges and press 'd' to delete
 - **Search Functionality**: Search for nodes by exact name match with visual highlighting
 - **Persistent Storage**: Automatic save/load using browser's localStorage
@@ -91,22 +92,25 @@ An interactive graph editor built with React 19, TypeScript, and React Flow that
 
 ```
 src/
-├── components/               # React components
-│   ├── GraphCanvas.tsx       # Main graph visualization
-│   ├── SearchBar.tsx           
-│   └── NodeCreationModal.tsx
-├── stores/                   # MobX stores
-│   ├── GraphStore.ts         # Core graph state and logic
-│   └── StoreContext.tsx      # React context for store
-├── types/                      
-│   └── graph.types.ts
-└── styles/                     
+├── components/                 # React components
+│   ├── GraphCanvas.tsx         # Main graph visualization
+│   ├── SearchBar.tsx           # Node search with highlighting
+│   ├── NodeCreationModal.tsx   # Node creation dialog
+│   └── EdgePropertiesModal.tsx # Edge weight editor
+├── stores/                     # MobX stores
+│   ├── GraphStore.ts           # Core graph state and logic
+│   └── StoreContext.tsx        # React context for store
+├── types/
+│   └── graph.types.ts          # TypeScript type definitions
+└── styles/                     # CSS modules
 ```
 
 ### Key Components
-- **GraphStore**: Central state management with MobX observables
-- **GraphCanvas**: React Flow wrapper with event handlers
-- **NodeCreationModal**: Controlled form for node creation with validation
+- **GraphStore**: Central state management with MobX observables, handles graph operations and persistence
+- **GraphCanvas**: React Flow wrapper with event handlers for node/edge creation, deletion, and interaction
+- **NodeCreationModal**: Controlled form for node creation with validation and duplicate detection
+- **EdgePropertiesModal**: Dialog for editing edge weights with numeric input validation
+- **SearchBar**: Search interface with exact match and visual highlighting
 
 ## Known Limitations
 

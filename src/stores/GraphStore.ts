@@ -126,6 +126,16 @@ class GraphStore {
     this.saveToLocalStorage();
     return { success: true };
   }
+
+  updateEdgeProperties(edgeId: string, weight?: number) {
+    const edge = this.edges.find(e => e.id === edgeId);
+    if (edge) {
+      edge.data = { weight };
+      edge.label = weight !== undefined && weight !== null ? String(weight) : undefined;
+      this.edges = [...this.edges];
+      this.saveToLocalStorage();
+    }
+  }
 }
 
 export default GraphStore;

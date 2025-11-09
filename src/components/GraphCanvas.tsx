@@ -12,11 +12,13 @@ import ReactFlow, {
   EdgeChange,
   applyNodeChanges,
   applyEdgeChanges,
+  Edge,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useGraphStore } from '../stores/StoreContext';
 import NodeCreationModal from './NodeCreationModal';
 import SearchBar from './SearchBar';
+import EdgePropertiesModal from './EdgePropertiesModal';
 
 const GraphCanvas = observer(() => {
   const graphStore = useGraphStore();
@@ -29,6 +31,16 @@ const GraphCanvas = observer(() => {
     isOpen: false,
     screenPosition: { x: 0, y: 0 },
     flowPosition: { x: 0, y: 0 },
+  });
+  const [edgeModalState, setEdgeModalState] = useState<{
+    isOpen: boolean;
+    screenPosition: { x: number; y: number };
+    edgeId: string | null;
+    weight?: number;
+  }>({
+    isOpen: false,
+    screenPosition: { x: 0, y: 0 },
+    edgeId: null,
   });
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -48,7 +60,15 @@ const GraphCanvas = observer(() => {
 
   const onConnect = useCallback(
     (params: Connection) => {
-      graphStore.updateEdges(addEdge(params, graphStore.edges));
+      const newEdge = addEdge(params, graphStore.edges);
+      const addedEdge = newEdge[newEdge.length - 1];
+
+      if (addedEdge) {
+        graphStore.updateEdges(newEdge);
+        setTimeout(() => {
+          graphStore.updateEdgeProperties(addedEdge.id, 1);
+        }, 0);
+      }
     },
     [graphStore]
   );
@@ -140,6 +160,31 @@ const GraphCanvas = observer(() => {
     setModalState({ ...modalState, isOpen: false });
   }, [modalState]);
 
+  const onEdgeDoubleClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      event.stopPropagation();
+      setEdgeModalState({
+        isOpen: true,
+        screenPosition: { x: event.clientX, y: event.clientY },
+        edgeId: edge.id,
+        weight: edge.data?.weight,
+      });
+    },
+    []
+  );
+
+  const handleEdgeModalSubmit = useCallback(
+    (edgeId: string, weight?: number) => {
+      graphStore.updateEdgeProperties(edgeId, weight);
+      setEdgeModalState({ ...edgeModalState, isOpen: false });
+    },
+    [graphStore, edgeModalState]
+  );
+
+  const handleEdgeModalCancel = useCallback(() => {
+    setEdgeModalState({ ...edgeModalState, isOpen: false });
+  }, [edgeModalState]);
+
   const nodesWithHighlight = graphStore.nodes.map(node => ({
     ...node,
     className: node.id === graphStore.highlightedNodeId ? 'highlighted-node' : '',
@@ -157,6 +202,7 @@ const GraphCanvas = observer(() => {
         onConnectStart={onConnectStart}
         onConnectEnd={onConnectEnd}
         onPaneClick={onPaneClick}
+        onEdgeDoubleClick={onEdgeDoubleClick}
         fitView
       >
         <Controls />
@@ -168,6 +214,14 @@ const GraphCanvas = observer(() => {
         position={modalState.screenPosition}
         onSubmit={handleModalSubmit}
         onCancel={handleModalCancel}
+      />
+      <EdgePropertiesModal
+        isOpen={edgeModalState.isOpen}
+        position={edgeModalState.screenPosition}
+        edgeId={edgeModalState.edgeId}
+        currentWeight={edgeModalState.weight}
+        onSubmit={handleEdgeModalSubmit}
+        onCancel={handleEdgeModalCancel}
       />
     </div>
   );

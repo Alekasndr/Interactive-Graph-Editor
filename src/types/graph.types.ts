@@ -4,7 +4,9 @@ export type GraphNode = Node<{
   label: string;
 }>;
 
-export type GraphEdge = Edge;
+export type GraphEdge = Edge<{
+  weight?: number;
+}>;
 
 export interface GraphData {
   nodes: GraphNode[];

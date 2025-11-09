@@ -1,0 +1,27 @@
+.modal-label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #333;
+}
+
+.modal-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  user-select: none;
+}
+
+.modal-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.modal-checkbox-label:hover {
+  color: #1a73e8;
+}
