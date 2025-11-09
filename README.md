@@ -1,46 +1,136 @@
-# Getting Started with Create React App
+# Interactive Graph Editor
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An interactive graph editor built with React 19, TypeScript, and React Flow that allows users to create, edit, and manage graph structures with nodes and edges.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Node Management**: Create nodes by clicking on the canvas background
+- **Edge Creation**: Connect nodes by dragging between node handles
+- **Delete Operations**: Select nodes/edges and press 'd' to delete
+- **Search Functionality**: Search for nodes by exact name match with visual highlighting
+- **Persistent Storage**: Automatic save/load using browser's localStorage
+- **Interactive Canvas**: Pan, zoom, and drag nodes freely
 
-### `npm start`
+## How to Run the Project
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Prerequisites
+- Node.js (v14 or higher)
+- npm
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Installation & Running
 
-### `npm test`
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. Start the development server:
+   ```bash
+   npm start
+   ```
 
-### `npm run build`
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Design Decisions and Trade-offs
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Technology Stack
+- **React 19**: Latest React version with improved performance and JSX transform
+- **TypeScript**: Type safety and better developer experience
+- **MobX**: Simple and scalable state management with minimal boilerplate
+- **React Flow**: Robust graph visualization library with built-in features
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### State Management
+**Decision**: Used MobX for centralized state management instead of React's built-in state.
 
-### `npm run eject`
+**Reasoning**:
+- Reactive updates without complex dependency arrays
+- Clean separation of business logic from UI components
+- Easy to observe and react to state changes
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+**Trade-off**: Adds external dependency, but the simplicity of MobX's observable patterns outweighs the cost for this use case.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Storage Strategy
+**Decision**: localStorage for automatic persistence with JSON serialization.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+**Reasoning**:
+- Simple, browser-native solution
+- No backend required
+- Instant save/restore across sessions
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+**Trade-off**: Limited storage capacity (~5-10MB), data stored client-side only. For production, consider backend storage for multi-device sync and larger graphs.
 
-## Learn More
+### Node Creation UX
+**Decision**: Modal popup on background click rather than toolbar button.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**Reasoning**:
+- Creates node at clicked position (intuitive spatial mapping)
+- Modal ensures valid node names before creation
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+**Trade-off**: Added complexity to prevent modal from opening during edge creation (requires connection state tracking).
+
+### Search Implementation
+**Decision**: Exact match search with button trigger rather than live filtering.
+
+**Reasoning**:
+- Clear "not found" feedback for user
+- Prevents partial match confusion
+- Button click makes search action explicit
+
+### Deletion UX
+**Decision**: Keyboard shortcut ('d' key) rather than delete button.
+
+**Reasoning**:
+- Faster workflow for power users
+- Follows common graph editor conventions
+- Works for both nodes and edges uniformly
+
+**Trade-off**: Less discoverable for new users; could add context menu in future.
+
+## Architecture
+
+```
+src/
+├── components/               # React components
+│   ├── GraphCanvas.tsx       # Main graph visualization
+│   ├── SearchBar.tsx           
+│   └── NodeCreationModal.tsx
+├── stores/                   # MobX stores
+│   ├── GraphStore.ts         # Core graph state and logic
+│   └── StoreContext.tsx      # React context for store
+├── types/                      
+│   └── graph.types.ts
+└── styles/                     
+```
+
+### Key Components
+- **GraphStore**: Central state management with MobX observables
+- **GraphCanvas**: React Flow wrapper with event handlers
+- **NodeCreationModal**: Controlled form for node creation with validation
+
+## Known Limitations
+
+1. **Storage Capacity**: localStorage has ~5-10MB limit; large graphs may exceed this
+2. **No Undo/Redo**: Deletion operations are permanent (no history stack)
+3. **Single Graph**: No support for multiple graph documents or tabs
+4. **Basic Search**: Only supports exact name matching (case-insensitive)
+5. **No Export**: Cannot export graph to external formats (JSON, PNG, etc.)
+6. **Node ID Generation**: Simple incremental IDs; may conflict if nodes are deleted and recreated
+7. **No Collision Detection**: Nodes can overlap freely
+
+## Future Improvements
+
+### High Priority
+- **Undo/Redo System**: Implement command pattern with history stack
+- **Export/Import**: Support JSON export and file upload for sharing graphs
+- **Node Types**: Allow different node shapes/colors for categorization
+
+### Medium Priority
+- **Multi-Select**: Select multiple nodes with drag rectangle
+- **Keyboard Shortcuts**: More shortcuts (Ctrl+Z, Ctrl+C, Ctrl+V)
+- **Backend Integration**: API for server-side storage and collaboration
+
+### Low Priority
+- **Auto-Layout**: Algorithm to arrange nodes automatically
+- **Themes**: Dark mode and custom color schemes
+- **Touch Support**: Better mobile/tablet interaction
