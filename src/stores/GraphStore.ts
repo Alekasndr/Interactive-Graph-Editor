@@ -1,28 +1,56 @@
 import { makeAutoObservable } from 'mobx';
 import { GraphNode, GraphEdge } from '../types/graph.types';
 
-class GraphStore {
-  nodes: GraphNode[] = [
-    {
-      id: '1',
-      type: 'default',
-      position: { x: 100, y: 100 },
-      data: { label: 'Node 1' },
-    },
-    {
-      id: '2',
-      type: 'default',
-      position: { x: 400, y: 200 },
-      data: { label: 'Node 2' },
-    },
-  ];
+const STORAGE_KEY = 'graph-editor-data';
 
+const DEFAULT_NODES: GraphNode[] = [
+  {
+    id: '1',
+    type: 'default',
+    position: { x: 100, y: 100 },
+    data: { label: 'Node 1' },
+  },
+  {
+    id: '2',
+    type: 'default',
+    position: { x: 400, y: 200 },
+    data: { label: 'Node 2' },
+  },
+];
+
+class GraphStore {
+  nodes: GraphNode[] = [];
   edges: GraphEdge[] = [];
   searchQuery: string = '';
   highlightedNodeId: string | null = null;
 
   constructor() {
     makeAutoObservable(this);
+    this.loadFromLocalStorage();
+  }
+
+  private saveToLocalStorage() {
+    const data = {
+      nodes: this.nodes,
+      edges: this.edges,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  private loadFromLocalStorage() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        this.nodes = data.nodes || [];
+        this.edges = data.edges || [];
+      } else {
+        this.nodes = [...DEFAULT_NODES];
+      }
+    } catch (error) {
+      console.error('Failed to load from localStorage:', error);
+      this.nodes = [...DEFAULT_NODES];
+    }
   }
 
   setSearchQuery(query: string) {
@@ -53,10 +81,12 @@ class GraphStore {
 
   updateNodes(newNodes: GraphNode[]) {
     this.nodes = newNodes;
+    this.saveToLocalStorage();
   }
 
   updateEdges(newEdges: GraphEdge[]) {
     this.edges = newEdges;
+    this.saveToLocalStorage();
   }
 
   deleteNodes(nodeIds: string[]) {
@@ -67,11 +97,13 @@ class GraphStore {
       !nodeIds.includes(edge.source) && !nodeIds.includes(edge.target)
     );
     this.edges = [...this.edges];
+    this.saveToLocalStorage();
   }
 
   deleteEdges(edgeIds: string[]) {
     this.edges = this.edges.filter(edge => !edgeIds.includes(edge.id));
     this.edges = [...this.edges];
+    this.saveToLocalStorage();
   }
 
   addNode(label: string, position: { x: number; y: number }): { success: boolean; error?: string } {
@@ -92,6 +124,7 @@ class GraphStore {
 
     this.nodes.push(newNode);
     this.nodes = [...this.nodes];
+    this.saveToLocalStorage();
     return { success: true };
   }
 }
