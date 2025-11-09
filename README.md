@@ -2,6 +2,10 @@
 
 An interactive graph editor built with React 19, TypeScript, and React Flow that allows users to create, edit, and manage graph structures with nodes and edges.
 
+**🚀 Live Demo**: [https://interactive-graph-editor.vercel.app/](https://interactive-graph-editor.vercel.app/)
+
+Try the application directly in your browser - create nodes, connect edges, set weights, and find shortest paths using Dijkstra's algorithm!
+
 ## Features
 
 - **Node Management**: Create nodes by clicking on the canvas background
