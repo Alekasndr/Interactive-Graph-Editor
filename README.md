@@ -7,6 +7,7 @@ An interactive graph editor built with React 19, TypeScript, and React Flow that
 - **Node Management**: Create nodes by clicking on the canvas background
 - **Edge Creation**: Connect nodes by dragging between node handles
 - **Edge Weights**: All edges have weights (default = 1), editable by double-clicking the edge
+- **Path Finding**: Find shortest path between two nodes using Dijkstra's algorithm
 - **Delete Operations**: Select nodes/edges and press 'd' to delete
 - **Search Functionality**: Search for nodes by exact name match with visual highlighting
 - **Persistent Storage**: Automatic save/load using browser's localStorage
@@ -88,29 +89,47 @@ An interactive graph editor built with React 19, TypeScript, and React Flow that
 
 **Trade-off**: Less discoverable for new users; could add context menu in future.
 
+### Path Finding Algorithm
+**Decision**: Dijkstra's algorithm for shortest path calculation.
+
+**Reasoning**:
+- Guarantees optimal solution for non-negative edge weights
+- Well-understood and proven algorithm
+- Reasonable performance for small-to-medium graphs (up to ~1000 nodes)
+- Simple implementation without external dependencies
+
+**Trade-off**: O(V² + E) time complexity without priority queue optimization. For very large graphs (10,000+ nodes), consider A* or bidirectional search with priority queue for better performance.
+
 ## Architecture
 
 ```
 src/
-├── components/                 # React components
-│   ├── GraphCanvas.tsx         # Main graph visualization
-│   ├── SearchBar.tsx           # Node search with highlighting
-│   ├── NodeCreationModal.tsx   # Node creation dialog
-│   └── EdgePropertiesModal.tsx # Edge weight editor
-├── stores/                     # MobX stores
-│   ├── GraphStore.ts           # Core graph state and logic
-│   └── StoreContext.tsx        # React context for store
+├── components/                        # React components
+│   ├── GraphCanvas.tsx                # Main graph visualization
+│   ├── SearchBar.tsx                  # Node search with highlighting
+│   ├── NodeCreationModal.tsx          # Node creation dialog
+│   ├── EdgePropertiesModal.tsx        # Edge weight editor
+│   ├── PathFindingButton.tsx          # Path-finding mode toggle
+│   └── PathFindingInstructionsModal.tsx # First-time instructions
+├── stores/                            # MobX stores
+│   ├── GraphStore.ts                  # Core graph state and logic
+│   └── StoreContext.tsx               # React context for store
 ├── types/
-│   └── graph.types.ts          # TypeScript type definitions
-└── styles/                     # CSS modules
+│   └── graph.types.ts                 # TypeScript type definitions
+└── styles/                            # CSS modules
+    ├── NodeCreationModal.css          # Shared modal styles
+    ├── EdgePropertiesModal.css        # Edge modal specific styles
+    └── PathFindingButton.css          # Path-finding button styles
 ```
 
 ### Key Components
-- **GraphStore**: Central state management with MobX observables, handles graph operations and persistence
-- **GraphCanvas**: React Flow wrapper with event handlers for node/edge creation, deletion, and interaction
+- **GraphStore**: Central state management with MobX observables, handles graph operations, persistence, and Dijkstra's algorithm
+- **GraphCanvas**: React Flow wrapper with event handlers for node/edge creation, deletion, interaction, and path-finding mode
 - **NodeCreationModal**: Controlled form for node creation with validation and duplicate detection
-- **EdgePropertiesModal**: Dialog for editing edge weights with numeric input validation
+- **EdgePropertiesModal**: Dialog for editing edge weights with numeric input validation (prevents negative values)
 - **SearchBar**: Search interface with exact match and visual highlighting
+- **PathFindingButton**: Toggle button for activating path-finding mode
+- **PathFindingInstructionsModal**: One-time instructions modal for new users
 
 ## Known Limitations
 

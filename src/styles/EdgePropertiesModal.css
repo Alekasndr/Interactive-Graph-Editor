@@ -25,3 +25,9 @@
 .modal-checkbox-label:hover {
   color: #1a73e8;
 }
+
+.modal-error {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-bottom: 12px;
+}

@@ -136,6 +136,78 @@ class GraphStore {
       this.saveToLocalStorage();
     }
   }
+
+  /**
+   * Dijkstra's algorithm for finding shortest path between two nodes
+   */
+  findShortestPath(startNodeId: string, endNodeId: string): { path: string[]; distance: number } | null {
+    const distances: Map<string, number> = new Map();
+    const previous: Map<string, string | null> = new Map();
+    const unvisited = new Set<string>();
+
+    // Set initial distances
+    this.nodes.forEach(node => {
+      distances.set(node.id, node.id === startNodeId ? 0 : Infinity);
+      previous.set(node.id, null);
+      unvisited.add(node.id);
+    });
+
+    while (unvisited.size > 0) {
+      // Find node with minimum distance
+      let currentNode: string | null = null;
+      let minDistance = Infinity;
+
+      unvisited.forEach(nodeId => {
+        const dist = distances.get(nodeId) ?? Infinity;
+        if (dist < minDistance) {
+          minDistance = dist;
+          currentNode = nodeId;
+        }
+      });
+
+      // If no reachable node found or reached destination
+      if (currentNode === null || minDistance === Infinity) break;
+      if (currentNode === endNodeId) break;
+
+      unvisited.delete(currentNode);
+
+      const neighbors = this.edges.filter(
+        edge => edge.source === currentNode || edge.target === currentNode
+      );
+
+      neighbors.forEach(edge => {
+        const neighborId = edge.source === currentNode ? edge.target : edge.source;
+        if (!unvisited.has(neighborId)) return;
+
+        const weight = edge.data?.weight ?? 1;
+        const altDistance = (distances.get(currentNode!) ?? Infinity) + weight;
+
+        if (altDistance < (distances.get(neighborId) ?? Infinity)) {
+          distances.set(neighborId, altDistance);
+          previous.set(neighborId, currentNode);
+        }
+      });
+    }
+
+    // Reconstruct path
+    const path: string[] = [];
+    let current: string | null = endNodeId;
+
+    while (current !== null) {
+      path.unshift(current);
+      current = previous.get(current) ?? null;
+    }
+
+    // Check if path exists
+    if (path[0] !== startNodeId) {
+      return null;
+    }
+
+    return {
+      path,
+      distance: distances.get(endNodeId) ?? Infinity,
+    };
+  }
 }
 
 export default GraphStore;

@@ -19,6 +19,8 @@ import { useGraphStore } from '../stores/StoreContext';
 import NodeCreationModal from './NodeCreationModal';
 import SearchBar from './SearchBar';
 import EdgePropertiesModal from './EdgePropertiesModal';
+import PathFindingButton from './PathFindingButton';
+import PathFindingInstructionsModal from './PathFindingInstructionsModal';
 
 const GraphCanvas = observer(() => {
   const graphStore = useGraphStore();
@@ -43,6 +45,15 @@ const GraphCanvas = observer(() => {
     edgeId: null,
   });
   const [isConnecting, setIsConnecting] = useState(false);
+  const [pathFindingMode, setPathFindingMode] = useState(false);
+  const [pathFindingState, setPathFindingState] = useState<{
+    startNodeId: string | null;
+    highlightedPath: string[];
+  }>({
+    startNodeId: null,
+    highlightedPath: [],
+  });
+  const [showInstructions, setShowInstructions] = useState(false);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -185,17 +196,100 @@ const GraphCanvas = observer(() => {
     setEdgeModalState({ ...edgeModalState, isOpen: false });
   }, [edgeModalState]);
 
-  const nodesWithHighlight = graphStore.nodes.map(node => ({
-    ...node,
-    className: node.id === graphStore.highlightedNodeId ? 'highlighted-node' : '',
-  }));
+  const handlePathFindingClick = useCallback(() => {
+    const firstTimeKey = 'pathfinding-instructions-seen';
+    const hasSeenInstructions = localStorage.getItem(firstTimeKey);
+
+    if (!hasSeenInstructions) {
+      setShowInstructions(true);
+      localStorage.setItem(firstTimeKey, 'true');
+    }
+
+    setPathFindingMode(!pathFindingMode);
+    setPathFindingState({ startNodeId: null, highlightedPath: [] });
+  }, [pathFindingMode]);
+
+  const handleNodeClickForPathFinding = useCallback(
+    (nodeId: string) => {
+      if (!pathFindingState.startNodeId) {
+        setPathFindingState({ startNodeId: nodeId, highlightedPath: [] });
+      } else if (pathFindingState.startNodeId === nodeId) {
+        alert('Please select a different node as the destination!');
+      } else {
+        const result = graphStore.findShortestPath(pathFindingState.startNodeId, nodeId);
+
+        if (result) {
+          setPathFindingState({ startNodeId: null, highlightedPath: result.path });
+          alert(`Shortest path found!\nDistance: ${result.distance}\nPath length: ${result.path.length} nodes`);
+
+          setTimeout(() => {
+            setPathFindingState({ startNodeId: null, highlightedPath: [] });
+          }, 5000);
+        } else {
+          alert('No path exists between these nodes!');
+          setPathFindingState({ startNodeId: null, highlightedPath: [] });
+        }
+        setPathFindingMode(false);
+      }
+    },
+    [pathFindingState, graphStore]
+  );
+
+  const onNodeClick = useCallback(
+    (event: React.MouseEvent, node: any) => {
+      if (pathFindingMode) {
+        event.stopPropagation();
+        handleNodeClickForPathFinding(node.id);
+      }
+    },
+    [pathFindingMode, handleNodeClickForPathFinding]
+  );
+
+  const nodesWithHighlight = graphStore.nodes.map(node => {
+    let className = '';
+
+    if (node.id === graphStore.highlightedNodeId) {
+      className = 'highlighted-node';
+    }
+
+    if (pathFindingState.highlightedPath.includes(node.id)) {
+      className += ' path-node';
+    }
+
+    if (pathFindingState.startNodeId === node.id) {
+      className += ' start-node';
+    }
+
+    return {
+      ...node,
+      className: className.trim(),
+    };
+  });
+
+  const edgesWithHighlight = graphStore.edges.map(edge => {
+    const isInPath = pathFindingState.highlightedPath.length > 0 &&
+      pathFindingState.highlightedPath.some((nodeId, index) => {
+        if (index === pathFindingState.highlightedPath.length - 1) return false;
+        const nextNodeId = pathFindingState.highlightedPath[index + 1];
+        return (
+          (edge.source === nodeId && edge.target === nextNodeId) ||
+          (edge.source === nextNodeId && edge.target === nodeId)
+        );
+      });
+
+    return {
+      ...edge,
+      className: isInPath ? 'path-edge' : '',
+    };
+  });
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <SearchBar />
+      <PathFindingButton onClick={handlePathFindingClick} isActive={pathFindingMode} />
       <ReactFlow
         nodes={nodesWithHighlight}
-        edges={graphStore.edges}
+        edges={edgesWithHighlight}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -203,6 +297,7 @@ const GraphCanvas = observer(() => {
         onConnectEnd={onConnectEnd}
         onPaneClick={onPaneClick}
         onEdgeDoubleClick={onEdgeDoubleClick}
+        onNodeClick={onNodeClick}
         fitView
       >
         <Controls />
@@ -222,6 +317,10 @@ const GraphCanvas = observer(() => {
         currentWeight={edgeModalState.weight}
         onSubmit={handleEdgeModalSubmit}
         onCancel={handleEdgeModalCancel}
+      />
+      <PathFindingInstructionsModal
+        isOpen={showInstructions}
+        onClose={() => setShowInstructions(false)}
       />
     </div>
   );

@@ -18,3 +18,47 @@
     box-shadow: 0 0 0 3px #1a73e8, 0 0 30px rgba(26, 115, 232, 0.8);
   }
 }
+
+/* Path-finding styles */
+.react-flow__node.path-node {
+  box-shadow: 0 0 0 4px #4caf50, 0 0 25px rgba(76, 175, 80, 0.7);
+  animation: pathPulse 1.5s ease-in-out infinite;
+}
+
+.react-flow__node.start-node {
+  box-shadow: 0 0 0 4px #ff9800, 0 0 25px rgba(255, 152, 0, 0.7);
+  animation: startPulse 1s ease-in-out infinite;
+}
+
+@keyframes pathPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px #4caf50, 0 0 25px rgba(76, 175, 80, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 4px #4caf50, 0 0 35px rgba(76, 175, 80, 1);
+  }
+}
+
+@keyframes startPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px #ff9800, 0 0 25px rgba(255, 152, 0, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 4px #ff9800, 0 0 35px rgba(255, 152, 0, 1);
+  }
+}
+
+.react-flow__edge.path-edge .react-flow__edge-path {
+  stroke: #4caf50;
+  stroke-width: 4;
+  animation: pathEdgePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pathEdgePulse {
+  0%, 100% {
+    stroke-width: 4;
+  }
+  50% {
+    stroke-width: 5;
+  }
+}

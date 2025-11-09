@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import '../styles/NodeCreationModal.css';
 import '../styles/EdgePropertiesModal.css';
 
 interface EdgePropertiesModalProps {
@@ -19,11 +20,13 @@ const EdgePropertiesModal = ({
   onCancel,
 }: EdgePropertiesModalProps) => {
   const [weight, setWeight] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const weightInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setWeight(currentWeight !== undefined ? String(currentWeight) : '');
+      setError('');
       setTimeout(() => weightInputRef.current?.focus(), 100);
     }
   }, [isOpen, currentWeight]);
@@ -32,6 +35,12 @@ const EdgePropertiesModal = ({
     e.preventDefault();
     if (edgeId) {
       const weightValue = weight.trim() === '' ? undefined : parseFloat(weight);
+
+      if (weightValue !== undefined && weightValue < 0) {
+        setError('Weight cannot be negative');
+        return;
+      }
+
       onSubmit(edgeId, weightValue);
     }
   };
@@ -69,6 +78,8 @@ const EdgePropertiesModal = ({
               className="modal-input"
             />
           </label>
+
+          {error && <div className="modal-error">{error}</div>}
 
           <div className="modal-buttons">
             <button type="submit" className="modal-btn modal-btn-primary">
