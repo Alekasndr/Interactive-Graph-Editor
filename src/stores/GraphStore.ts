@@ -123,7 +123,6 @@ class GraphStore {
     };
 
     this.nodes.push(newNode);
-    this.nodes = [...this.nodes];
     this.saveToLocalStorage();
     return { success: true };
   }
