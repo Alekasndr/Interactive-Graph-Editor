@@ -94,27 +94,6 @@ const GraphCanvas = observer(() => {
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'd' || event.key === 'D') {
-        const selectedNodes = graphStore.nodes.filter(node => node.selected);
-        const selectedEdges = graphStore.edges.filter(edge => edge.selected);
-
-        if (selectedNodes.length > 0 || selectedEdges.length > 0) {
-          event.preventDefault();
-
-          if (selectedNodes.length > 0) {
-            const nodeIds = selectedNodes.map(node => node.id);
-            graphStore.deleteNodes(nodeIds);
-          }
-
-          if (selectedEdges.length > 0) {
-            const edgeIds = selectedEdges.map(edge => edge.id);
-            graphStore.deleteEdges(edgeIds);
-          }
-        }
-      }
-    };
-
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (target.closest('.search-bar-container')) {
@@ -123,10 +102,8 @@ const GraphCanvas = observer(() => {
       graphStore.setSearchQuery('');
     };
 
-    window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('click', handleClick);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('click', handleClick);
     };
   }, [graphStore]);

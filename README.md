@@ -12,7 +12,7 @@ Try the application directly in your browser - create nodes, connect edges, set 
 - **Edge Creation**: Connect nodes by dragging between node handles
 - **Edge Weights**: All edges have weights (default = 1), editable by double-clicking the edge
 - **Path Finding**: Find shortest path between two nodes using Dijkstra's algorithm
-- **Delete Operations**: Select nodes/edges and press 'd' to delete
+- **Delete Operations**: Select nodes/edges and press Backspace to delete
 - **Search Functionality**: Search for nodes by exact name match with visual highlighting
 - **Persistent Storage**: Automatic save/load using browser's localStorage
 - **Interactive Canvas**: Pan, zoom, and drag nodes freely
@@ -84,14 +84,15 @@ Try the application directly in your browser - create nodes, connect edges, set 
 - Button click makes search action explicit
 
 ### Deletion UX
-**Decision**: Keyboard shortcut ('d' key) rather than delete button.
+**Decision**: Use React Flow's built-in Backspace key deletion.
 
 **Reasoning**:
-- Faster workflow for power users
-- Follows common graph editor conventions
+- Standard browser behavior (Backspace to delete)
+- No custom event handlers needed
 - Works for both nodes and edges uniformly
+- Provided by React Flow out of the box
 
-**Trade-off**: Less discoverable for new users; could add context menu in future.
+**Trade-off**: None - this is the standard deletion method for React Flow applications.
 
 ### Path Finding Algorithm
 **Decision**: Dijkstra's algorithm for shortest path calculation.
